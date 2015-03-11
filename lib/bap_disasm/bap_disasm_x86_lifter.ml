@@ -182,7 +182,7 @@ module ToIR = struct
       Stmt.Move (v, Exp.(Var v + (df_to_offset mode df_e * i (bytes_of_width t))))
 
   let rep_wrap ?check_zf ~mode ~addr ~next stmts =
-    let bi = big_int_of_mode mode in
+    let bi x = resize_word x @@ width_of_mode mode in
     let bi0 = Word.b0 in
     let bi1 = Word.b1 in
     let endstmt = match check_zf with
