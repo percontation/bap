@@ -1,4 +1,4 @@
-open Bap_core_theory
+(*open Bap_core_theory
 
 type exp = X86_legacy_bil.Ast.exp
 
@@ -13,3 +13,4 @@ module Binary : sig
 end
 
 val init : unit -> unit
+*)

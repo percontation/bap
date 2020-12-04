@@ -590,6 +590,33 @@ module FPEmulator = struct
 
   let fsqrt rm x = fuop FBil.fsqrt rm x
 
+  let fconvert : type f a.
+    f Theory.Float.t Theory.Value.sort -> Theory.rmode -> a Theory.float -> f Theory.float =
+    fun s rm x ->
+    x >>= fun x ->
+    let xs = sort x in
+    match ieee754_of_sort s, ieee754_of_sort xs with
+    | Some q, Some ({Theory.IEEE754.k} as p) ->
+      let bs = bits k in
+      let x = resort bs x in
+      float s @@ FBil.convert (Theory.IEEE754.Sort.define p) (!!x) rm (Theory.IEEE754.Sort.define q)
+    | _, _ -> Core.unk s
+
+  let fclsop : type f.
+    _ -> f Theory.float -> Theory.bool =
+    fun op x ->
+    x >>= fun x ->
+    let xs = sort x in
+    match ieee754_of_sort xs with
+    | None -> Core.unk bool
+    | Some ({Theory.IEEE754.k} as p) ->
+      let bs = bits k in
+      let x = resort bs x in
+      op (Theory.IEEE754.Sort.define p) !!x
+
+  let is_fzero x = fclsop FBil.is_zero x
+  let is_fnorm x = fclsop FBil.is_normal x
+
   open Core
 
   let small s x =

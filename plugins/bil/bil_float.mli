@@ -7,6 +7,9 @@ type ('b,'e,'t,'s) fsort = (('b,'e,'t) IEEE754.t,'s) format Float.t Value.sort
 
 module Make(B : Theory.Core) : sig
 
+  val is_zero : ('b,'e,'t,'s) fsort -> 's bitv -> bool
+  val is_normal : ('b,'e,'t,'s) fsort -> 's bitv -> bool
+
   val fadd : ('b,'e,'t,'s) fsort -> rmode -> 's bitv ->  's bitv -> 's bitv
   val fsub : ('b,'e,'t,'s) fsort -> rmode -> 's bitv ->  's bitv -> 's bitv
   val fmul : ('b,'e,'t,'s) fsort -> rmode -> 's bitv ->  's bitv -> 's bitv

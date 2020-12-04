@@ -14,7 +14,14 @@ type stmt = Ast.stmt
 module Var = Var
 type rmode = Type.roundmode_type
 
-module Binary = X86_legacy_bil_semantics.Binary
+(* module Binary = X86_legacy_bil_semantics.Binary *)
+module Binary = struct
+  let mk_nan {Theory.IEEE754.w; t} is_quiet =
+    let b0 = Ast.Int (Z.zero, Reg 1) in
+    let ones = Ast.Int (Z.minus_one, Reg w) in
+    let payload = Ast.Unknown ("nan-payload", Reg (t-1)) in
+    Ast.Concat (b0, Concat(ones, Concat (is_quiet, payload)))
+end
 include Bap.Std.Self()
 
 

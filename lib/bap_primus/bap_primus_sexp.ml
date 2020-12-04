@@ -72,6 +72,7 @@ let rec sexp_of_exp = function
   | Bil.Ite (c,x,y) ->
     Sexp.List [
       Sexp.Atom "ite";
+      sexp_of_exp c;
       sexp_of_exp x;
       sexp_of_exp y;
     ]

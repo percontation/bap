@@ -64,5 +64,5 @@ let () =
       main !!kind !!x32 !!x64;
       if !!fp_lifter then begin
         X86_legacy_bil_lifter.init ();
-        X86_legacy_bil_semantics.init ();
+        (* X86_legacy_bil_semantics.init (); *)
       end)

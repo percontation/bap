@@ -1,4 +1,4 @@
-open Core_kernel
+(*open Core_kernel
 open Bap_core_theory
 open Bap_knowledge
 
@@ -697,3 +697,4 @@ let init () =
     ~desc:"semantics in legacy AST"
     ~name:"legacy-bil"
     !!(module Legacy : Theory.Core)
+*)

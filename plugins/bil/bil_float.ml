@@ -277,7 +277,7 @@ module Make(B : Theory.Core) = struct
     inv (is_all_ones expn) >>>= fun ok_expn ->
     ok_expn && (non_zero expn || non_zero coef)
 
-  let is_norml fsort x =
+  let is_normal fsort x =
     unpack_raw fsort x @@ fun _ e _ ->
     B.(non_zero e && inv (is_all_ones e))
   let is_subnormal fsort x =
@@ -1000,4 +1000,6 @@ module Make(B : Theory.Core) = struct
     B.unsigned (exps fsort') d_expn >>>= fun d_expn ->
     range_reconstruction fsort' y d_expn clz increase >>>= fun r ->
     truncate fsort' r B.rne fsort
+
+  let is_zero _ = is_zero
 end
