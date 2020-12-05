@@ -143,6 +143,8 @@ module type Fbasic = sig
   val is_fzero : 'f float -> bool
   val is_fpos : 'f float -> bool
   val is_fneg : 'f float -> bool
+  val is_fnorm : 'f float -> bool
+  val is_fsub : 'f float -> bool
 
   val rne : rmode
   val rna : rmode

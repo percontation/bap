@@ -70,6 +70,15 @@ let binary32 = {
   t = 23;
 }
 
+let binary79 = {
+  base = 2;
+  bias = 16383;
+  k = 79;
+  p = 64;
+  w = 15;
+  t = 63;
+}
+
 let binary80 = {
   base = 2;
   bias = 16383;
@@ -88,6 +97,7 @@ let decimal128 = decimal 128
 let binary = function
   | 16 -> binary16
   | 32 -> binary32
+  | 79 -> binary79
   | 80 -> binary80
   | k -> binary k
 
@@ -126,6 +136,7 @@ let binary = function
   | 0  -> None
   | 16 -> Some binary16
   | 32 -> Some binary32
+  | 79 -> Some binary79
   | 80 -> Some binary80
   | n when n mod 32 = 0 -> Some (binary n)
   | _ -> None

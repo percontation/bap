@@ -15,6 +15,7 @@ type parameters = private {
 val binary16 : parameters
 val binary32 : parameters
 val binary64 : parameters
+val binary79 : parameters
 val binary80 : parameters
 val binary128 : parameters
 val decimal32 : parameters

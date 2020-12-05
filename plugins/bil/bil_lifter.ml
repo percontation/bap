@@ -484,7 +484,7 @@ let provide_lifter ~enable_intrinsics ~with_fp () =
     Knowledge.collect Disasm_expert.Basic.Insn.slot obj >>? fun insn ->
     match lift ~enable_intrinsics arch mem insn with
     | Error err ->
-      info "BIL: the BIL lifter failed with %a" Error.pp err;
+      debug "BIL: the BIL lifter failed with %a" Error.pp err;
       !!Insn.empty
     | Ok bil ->
       Bil_semantics.context >>= fun ctxt ->

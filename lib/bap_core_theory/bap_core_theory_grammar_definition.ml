@@ -92,6 +92,8 @@ module type Bool = sig
   val is_fzero : exp -> t
   val is_fpos : exp -> t
   val is_fneg : exp -> t
+  val is_fnorm : exp -> t
+  val is_fsub : exp -> t
 
   val fle  : exp -> exp -> t
   val flt  : exp -> exp -> t

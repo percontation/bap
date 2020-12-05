@@ -2272,6 +2272,15 @@ module Theory : sig
     *)
     val is_fneg : 'f float -> bool
 
+    (** [is_fnorm x] holds if [x] represents a normal number.
+
+        A normal floating point number is finite, nonzero, and non-subnormal.
+    *)
+    val is_fnorm : 'f float -> bool
+
+    (** [is_fsub x] holds if [x] represents a subnormal number. *)
+    val is_fsub : 'f float -> bool
+
     (** {3 Rounding modes}
 
         Many operations in the Theory of Floating Point numbers are
@@ -2802,7 +2811,10 @@ module Theory : sig
     (** Parameters for the binary64 IEEE754 format.  *)
     val binary64 : parameters
 
-    (** Parameters for the binary80 IEEE754 format.  *)
+    (** Parameters for the 80-bit Intel extended precision format with implicit bit removed. *)
+    val binary79 : parameters
+
+    (** Parameters for the 80-bit Intel extended precision format.  *)
     val binary80 : parameters
 
     (** Parameters for the binary128 IEEE754 format.  *)
@@ -3316,6 +3328,12 @@ module Theory : sig
 
         (** [is_fneg x] is [is_fneg (float x)]  *)
         val is_fneg : exp -> t
+
+        (** [is_fnorm x] is [is_fnorm (float x)]  *)
+        val is_fnorm : exp -> t
+
+        (** [is_fsub x] is [is_fsub (float x)]  *)
+        val is_fsub : exp -> t
 
         (** [fle x y] is [p < q \/ p = q],
 

@@ -1580,7 +1580,7 @@ let insn arch mem insn =
   let addr = Memory.min_addr mem in
   Or_error.try_with (fun () -> disasm_instr mode mem addr) |> function
   | Error err ->
-    warning "the legacy lifter failed at %a - %a"
+    debug "the legacy lifter failed at %a - %a"
       pp_insn (mem,insn) Error.pp err;
     Error err
   | Ok bil -> match Type.check bil with

@@ -303,6 +303,8 @@ module Make(S : Core) = struct
         let is_fzero x = is_fzero (expf x)
         let is_nan x = is_nan (expf x)
         let is_inf x = is_inf (expf x)
+        let is_fnorm x = is_fnorm (expf x)
+        let is_fsub x = is_fsub (expf x)
       end)
   and expf : type s b e r k n i g a.
     context ->

@@ -185,6 +185,8 @@ let exp_ite ?t b e1 e2 =
   let tb = Typecheck.infer_ast b in
   let t1 = Typecheck.infer_ast e1 in
   let t2 = Typecheck.infer_ast e2 in
+  (* if not @@ Poly.(=) t1 t2 then
+    Printf.printf "%s %s\n%!" (Sexp.to_string @@ sexp_of_typ t1) (Sexp.to_string @@ sexp_of_typ t2); *)
   assert (Poly.(=) t1 t2);
   assert (Poly.(=) tb @@ Reg 1);
 

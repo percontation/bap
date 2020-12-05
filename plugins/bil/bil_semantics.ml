@@ -537,6 +537,7 @@ module FPEmulator = struct
       binary16;
       binary32;
       binary64;
+      binary79;
       binary80;
       binary128;
     ]
@@ -614,8 +615,33 @@ module FPEmulator = struct
       let x = resort bs x in
       op (Theory.IEEE754.Sort.define p) !!x
 
-  let is_fzero x = fclsop FBil.is_zero x
-  let is_fnorm x = fclsop FBil.is_normal x
+  let is_finite x = fclsop FBil.is_finite x
+  let is_nan    x = fclsop FBil.is_nan x
+  let is_inf    x = fclsop FBil.is_inf x
+  let is_fzero  x = fclsop FBil.is_zero x
+  let is_fpos   x = fclsop FBil.is_positive x
+  let is_fneg   x = fclsop FBil.is_negative x
+  let is_fnorm  x = fclsop FBil.is_normal x
+  let is_fsub   x = fclsop FBil.is_subnormal x
+
+  let fcmpop : type f.
+    (_ -> _ Theory.bitv -> _ Theory.bitv -> Theory.bool) ->
+    f Theory.float -> f Theory.float -> Theory.bool =
+    fun op x y ->
+    x >>= fun x ->
+    y >>= fun y ->
+    let xs = sort x in
+    match ieee754_of_sort xs with
+    | None -> Core.unk bool
+    | Some ({Theory.IEEE754.k} as p) ->
+      let bs = bits k in
+      let x = resort bs x and y = resort bs y in
+      op (Theory.IEEE754.Sort.define p) !!x !!y
+
+  let fle x y = fcmpop FBil.fle x y
+  let flt x y = fcmpop FBil.flt x y
+  let feq x y = fcmpop FBil.feq x y
+
 
   open Core
 

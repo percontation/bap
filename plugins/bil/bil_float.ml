@@ -283,7 +283,15 @@ module Make(B : Theory.Core) = struct
   let is_subnormal fsort x =
     unpack_raw fsort x @@ fun _ e _ -> B.is_zero e
 
-  let is_zero x =
+  let is_negative fsort x =
+    unpack_raw fsort x @@ fun sign expn coef ->
+    B.(sign && inv (is_all_ones expn && non_zero coef))
+
+  let is_positive fsort x =
+    unpack_raw fsort x @@ fun sign expn coef ->
+    B.(inv sign && inv (is_all_ones expn && non_zero coef))
+
+  let is_zero _ x =
     let open B in
     x >>-> fun s x ->
     is_zero ((!!x lsl one s) lsr one s)
@@ -978,7 +986,7 @@ module Make(B : Theory.Core) = struct
 
   let fsqrt fsort rm x =
     let fsort' = double_precision fsort in
-    B.ite (is_zero x) (fzero fsort B.b0)
+    B.ite (is_zero fsort x) (fzero fsort B.b0)
       (normalize_subnormal fsort x @@ fun x clz ->
        range_reduction fsort x @@ fun y d_expn increase ->
        fone fsort B.b0 >>>= fun one ->
@@ -988,6 +996,25 @@ module Make(B : Theory.Core) = struct
        B.unsigned (exps fsort') d_expn >>>= fun d_expn ->
        range_reconstruction fsort' y d_expn clz increase >>>= fun r ->
        truncate fsort' r rm fsort)
+
+  let fcmp (op:[<`LE|`LT|`EQ]) fsort (x : 'v Theory.bitv)  (y : 'v Theory.bitv) =
+    let either_nan = B.(||) (is_nan fsort x) (is_nan fsort y) in
+    let both_zero = B.(&&) (is_zero fsort x) (is_zero fsort y) in
+    B.ite either_nan B.b0 @@
+    match op with
+    | `EQ ->
+      B.(eq x y || both_zero)
+    | (`LT|`LE) as op ->
+      unpack_raw fsort x @@ fun xs xe xc ->
+      unpack_raw fsort y @@ fun ys ye yc ->
+      B.ite B.(inv xs && ys) (match op with `LT -> B.b0 | `LE -> both_zero) @@
+      B.ite B.(xs && inv ys) (match op with `LT -> B.inv both_zero | `LE -> B.b1) @@
+      B.ite B.(ult ye xe) xs @@
+      B.(eq xe ye && let t = xor xs (ult xc yc) in match op with `LT -> t | `LE -> t || eq xc yc)
+
+  let fle fsort x y = fcmp `LE fsort x y
+  let flt fsort x y = fcmp `LT fsort x y
+  let feq fsort x y = fcmp `EQ fsort x y
 
   let test fsort x =
     let fsort' = double_precision fsort in
@@ -1000,6 +1027,4 @@ module Make(B : Theory.Core) = struct
     B.unsigned (exps fsort') d_expn >>>= fun d_expn ->
     range_reconstruction fsort' y d_expn clz increase >>>= fun r ->
     truncate fsort' r B.rne fsort
-
-  let is_zero _ = is_zero
 end

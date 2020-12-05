@@ -149,7 +149,7 @@ let float : type t. (t,exp,rmode) Theory.Parser.float_parser =
     | UnOp (FP (FBVTOUF {exp_bits=11; sig_bits=53},r),x) ->
       S.ieee754_cast Theory.IEEE754.binary64 r x
     | UnOp (FP (FBVTOUF {exp_bits=15; sig_bits=64},r),x) ->
-      S.ieee754_cast Theory.IEEE754.binary80 r x
+      S.ieee754_cast Theory.IEEE754.binary79 r x
     | UnOp (FP (FBVTOUF {exp_bits=15; sig_bits=113},r),x) ->
       S.ieee754_cast Theory.IEEE754.binary128 r x
 
@@ -160,7 +160,7 @@ let float : type t. (t,exp,rmode) Theory.Parser.float_parser =
     | UnOp (FP (FBVTOSF {exp_bits=11; sig_bits=53},r),x) ->
       S.ieee754_cast_signed Theory.IEEE754.binary64 r x
     | UnOp (FP (FBVTOSF {exp_bits=15; sig_bits=64},r),x) ->
-      S.ieee754_cast_signed Theory.IEEE754.binary80 r x
+      S.ieee754_cast_signed Theory.IEEE754.binary79 r x
     | UnOp (FP (FBVTOSF {exp_bits=15; sig_bits=113},r),x) ->
       S.ieee754_cast_signed Theory.IEEE754.binary128 r x
 
@@ -171,7 +171,7 @@ let float : type t. (t,exp,rmode) Theory.Parser.float_parser =
     | UnOp (FP (FFTOF {exp_bits=11; sig_bits=53},r),x) ->
       S.ieee754_convert Theory.IEEE754.binary64 r x
     | UnOp (FP (FFTOF {exp_bits=15; sig_bits=64},r),x) ->
-      S.ieee754_convert Theory.IEEE754.binary80 r x
+      S.ieee754_convert Theory.IEEE754.binary79 r x
     | UnOp (FP (FFTOF {exp_bits=15; sig_bits=113},r),x) ->
       S.ieee754_convert Theory.IEEE754.binary128 r x
 
@@ -182,7 +182,7 @@ let float : type t. (t,exp,rmode) Theory.Parser.float_parser =
     | UnOp (FP (FIEEEBVTOF {exp_bits=11; sig_bits=53},r),x) ->
       S.ieee754 Theory.IEEE754.binary64 x
     | UnOp (FP (FIEEEBVTOF {exp_bits=15; sig_bits=64},r),x) ->
-      S.ieee754 Theory.IEEE754.binary80 x
+      S.ieee754 Theory.IEEE754.binary79 x
     | UnOp (FP (FIEEEBVTOF {exp_bits=15; sig_bits=113},r),x) ->
       S.ieee754 Theory.IEEE754.binary128 x
 
@@ -194,7 +194,7 @@ let float : type t. (t,exp,rmode) Theory.Parser.float_parser =
     | UnOp (FP (FNAN {exp_bits=11; sig_bits=53},r),x) ->
       nan S.ieee754 Theory.IEEE754.binary64 x
     | UnOp (FP (FNAN {exp_bits=15; sig_bits=64},r),x) ->
-      nan S.ieee754 Theory.IEEE754.binary80 x
+      nan S.ieee754 Theory.IEEE754.binary79 x
     | UnOp (FP (FNAN {exp_bits=15; sig_bits=113},r),x) ->
       nan S.ieee754 Theory.IEEE754.binary128 x
 
@@ -245,7 +245,8 @@ let bool : type t. (t,exp,rmode) Theory.Parser.bool_parser =
     | UnOp (FP (FISNAN,_), x) -> S.is_nan x
     | UnOp (FP (FISNEG,_), x) -> S.is_fneg x
     | UnOp (FP (FISPOS,_), x) -> S.is_fpos x
-    | UnOp (FP ((FISNORM|FISSUB),_),x) -> S.unknown ()
+    | UnOp (FP ((FISNORM),_),x) -> S.is_fnorm x
+    | UnOp (FP ((FISSUB),_),x) -> S.is_fsub x
     (* the rest is ill-formed *)
     | UnOp (_,_)
     | Cast (_,_,_)
@@ -275,7 +276,7 @@ let stmt : type t. (t,exp,rmode,stmt) Theory.Parser.stmt_parser =
       | Float {exp_bits=5; sig_bits=11} -> S.set_ieee754 n Theory.IEEE754.binary16 x
       | Float {exp_bits=8; sig_bits=24} -> S.set_ieee754 n Theory.IEEE754.binary32 x
       | Float {exp_bits=11; sig_bits=53} -> S.set_ieee754 n Theory.IEEE754.binary64 x
-      | Float {exp_bits=15; sig_bits=64} -> S.set_ieee754 n Theory.IEEE754.binary80 x
+      | Float {exp_bits=15; sig_bits=64} -> S.set_ieee754 n Theory.IEEE754.binary79 x
       | Float {exp_bits=15; sig_bits=113} -> S.set_ieee754 n Theory.IEEE754.binary128 x
       | _ -> S.special "unsupported-type"
     else match t with
@@ -285,7 +286,7 @@ let stmt : type t. (t,exp,rmode,stmt) Theory.Parser.stmt_parser =
       | Float {exp_bits=5; sig_bits=11} -> S.set_ieee754 n Theory.IEEE754.binary16 x
       | Float {exp_bits=8; sig_bits=24} -> S.set_ieee754 n Theory.IEEE754.binary32 x
       | Float {exp_bits=11; sig_bits=53} -> S.set_ieee754 n Theory.IEEE754.binary64 x
-      | Float {exp_bits=15; sig_bits=64} -> S.set_ieee754 n Theory.IEEE754.binary80 x
+      | Float {exp_bits=15; sig_bits=64} -> S.set_ieee754 n Theory.IEEE754.binary79 x
       | Float {exp_bits=15; sig_bits=113} -> S.set_ieee754 n Theory.IEEE754.binary128 x
       | _ -> S.special "unsupported-type" in
   function
@@ -351,10 +352,12 @@ module Bap_integration = struct
   let lift (module Core : Theory.Core) arch mem insn =
     match fp_lifter arch mem insn with
     | exception exn ->
-      warning "failed with an exception: %a" Exn.pp exn;
+      warning "the legacy float lifter failed at %a - %a"
+        X86_utils.pp_insn (mem,insn) Exn.pp exn;
       Knowledge.return empty
     | Error err ->
-      debug "failed with an error: %a" Error.pp err;
+      debug "the legacy float lifter failed at %a - %a"
+        X86_utils.pp_insn (mem,insn) Error.pp err;
       Knowledge.return empty
     | Ok prog ->
       let module Parser = Theory.Parser.Make(Core) in
