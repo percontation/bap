@@ -353,6 +353,8 @@ module Fp_lifter = struct
     | `UCOMISSrm
     | `UCOM_FIr
     | `UCOM_FIPr
+    | `COM_FIr
+    | `COM_FIPr
     | `UCOM_Fr
     | `UCOM_FPr
     | `FCOMr
@@ -764,18 +766,22 @@ module Fp_lifter = struct
       Core_kernel.Result.Ok stmts
     in
 
-    let ucomfi_r ~pop mem sti =
+    let comfi_r ~pop ~unordered:_ mem sti =
       let sti_index = decode sti |> value_exn |> st_index_of_reg_t in
       let sti = load_fp ~index:sti_index in
       let st0 = load_fp ~index:0 in
       (* FIXME: handle QNaN vs. SNaN and check for invalid operands:
        * https://en.wikipedia.org/wiki/Extended_precision#x86_extended_precision_format
+       * This code does not handle the case that an invalid-arithmetic-operand exception happens.
       *)
       let i0 = Int(Big_int_convenience.bi0, reg_1) in
       let i1 = Int(Big_int_convenience.bi1, reg_1) in
       let has_nan = binop OR (fisnan st0) (fisnan sti) in
       let stmts = [
         ToIR.move x87_c1 i0;
+        ToIR.move oF i0;
+        ToIR.move sf i0;
+        ToIR.move af i0;
         ToIR.move zf @@ exp_ite has_nan i1 (feq st0 sti);
         ToIR.move pf @@ exp_ite has_nan i1 i0;
         ToIR.move cf @@ exp_ite has_nan i1 (flt st0 sti);
@@ -1257,9 +1263,13 @@ module Fp_lifter = struct
     | `UCOMISSrm ->
       Operands.rm ~f:(ucomisx_rm ~typ:`reg_32 arch) mem insn |> ok_exn
     | `UCOM_FIr ->
-      Operands.r ~f:(ucomfi_r ~pop:false) mem insn |> ok_exn
+      Operands.r ~f:(comfi_r ~pop:false ~unordered:true) mem insn |> ok_exn
     | `UCOM_FIPr ->
-      Operands.r ~f:(ucomfi_r ~pop:true) mem insn |> ok_exn
+      Operands.r ~f:(comfi_r ~pop:true ~unordered:true) mem insn |> ok_exn
+    | `COM_FIr ->
+      Operands.r ~f:(comfi_r ~pop:false ~unordered:false) mem insn |> ok_exn
+    | `COM_FIPr ->
+      Operands.r ~f:(comfi_r ~pop:true ~unordered:false) mem insn |> ok_exn
 
     | `UCOM_Fr ->
       Operands.r ~f:(fcom_r ~pop:false ~unordered:true) mem insn |> ok_exn
