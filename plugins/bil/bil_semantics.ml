@@ -642,6 +642,10 @@ module FPEmulator = struct
   let flt x y = fcmpop FBil.flt x y
   let feq x y = fcmpop FBil.feq x y
 
+  let rne, rna, rtp, rtn, rtz = FBil.(rne, rna, rtp, rtn, rtz)
+
+  let requal x y = FBil.requal x y
+
 
   open Core
 

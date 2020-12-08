@@ -3074,7 +3074,7 @@ module Theory : sig
         type exp
 
 
-        (** an abstract type denoting a Core Theory rounding mode term,   *)
+        (** an abstract type denoting a Core Theory rounding mode term *)
         type rmode
 
 
@@ -3231,6 +3231,8 @@ module Theory : sig
         (** the type of expressions of the target language  *)
         type exp
 
+        (** an abstract type denoting a Core Theory rounding mode term *)
+        type rmode
 
         (** an ill-formed term.  *)
         val error : t
@@ -3358,6 +3360,9 @@ module Theory : sig
               and [not r] is [inv r].
         *)
         val feq  : exp -> exp -> t
+
+        (** [requal x y] is [x = y] *)
+        val requal  : rmode -> rmode -> t
       end
 
 
@@ -3766,7 +3771,8 @@ module Theory : sig
     (** [bool grammar exp] parses [exp] using [grammar]. *)
     type ('a,'e,'r) bool_parser =
       (module Grammar.Bool with type t = 'a
-                            and type exp = 'e) ->
+                            and type exp = 'e
+                            and type rmode = 'r) ->
       'e -> 'a
 
     (** [mem grammar exp] parses [exp] using [grammar]. *)

@@ -19,7 +19,8 @@ type ('a,'e,'r) bitv_parser =
 
 type ('a,'e,'r) bool_parser =
   (module Grammar.Bool with type t = 'a
-                        and type exp = 'e) ->
+                        and type exp = 'e
+                        and type rmode = 'r) ->
   'e -> 'a
 
 type ('a,'e) mem_parser =
@@ -233,11 +234,13 @@ module Make(S : Core) = struct
         open Knowledge.Syntax
         type nonrec t = bool
         type exp = e
+        type rmode = r
 
         let run = expb
         let expw s = expw ctxt self s
         let expm s = expm ctxt self s
         let expf s = expf ctxt self s
+        let expr s = expr ctxt self s
         let expb s = run ctxt self s
 
         let error = Knowledge.fail Error
@@ -305,6 +308,8 @@ module Make(S : Core) = struct
         let is_inf x = is_inf (expf x)
         let is_fnorm x = is_fnorm (expf x)
         let is_fsub x = is_fsub (expf x)
+
+        let requal x y = requal (expr x) (expr y)
       end)
   and expf : type s b e r k n i g a.
     context ->
@@ -386,7 +391,6 @@ module Make(S : Core) = struct
         let rtz = rtz
         let rtp = rtp
         let rtn = rtn
-        let rtz = rtz
         let rna = rna
       end)
 

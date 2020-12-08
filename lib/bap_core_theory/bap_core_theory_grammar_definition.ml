@@ -60,6 +60,7 @@ end
 module type Bool = sig
   type t
   type exp
+  type rmode
 
   val error : t
 
@@ -98,6 +99,8 @@ module type Bool = sig
   val fle  : exp -> exp -> t
   val flt  : exp -> exp -> t
   val feq  : exp -> exp -> t
+
+  val requal  : rmode -> rmode -> t
 end
 
 

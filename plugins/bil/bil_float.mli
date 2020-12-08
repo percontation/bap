@@ -6,6 +6,13 @@ open Theory
 type ('b,'e,'t,'s) fsort = (('b,'e,'t) IEEE754.t,'s) format Float.t Value.sort
 
 module Make(B : Theory.Core) : sig
+  (* The rmodes are implicitly emulated, and are actually 3-bit bitvecs. *)
+  val rne : rmode
+  val rna : rmode
+  val rtp : rmode
+  val rtn : rmode
+  val rtz : rmode
+  val requal : rmode -> rmode -> bool
 
   val is_finite    : ('b,'e,'t,'s) fsort -> 's bitv -> bool
   val is_nan       : ('b,'e,'t,'s) fsort -> 's bitv -> bool

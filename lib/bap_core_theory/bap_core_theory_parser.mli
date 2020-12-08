@@ -10,7 +10,8 @@ type ('a,'e,'r) bitv_parser =
 
 type ('a,'e,'r) bool_parser =
   (module Grammar.Bool with type t = 'a
-                        and type exp = 'e) ->
+                        and type exp = 'e
+                        and type rmode = 'r) ->
   'e -> 'a
 
 type ('a,'e) mem_parser =

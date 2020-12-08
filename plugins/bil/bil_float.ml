@@ -13,7 +13,7 @@ type ('b,'e,'t,'s) fsort = (('b,'e,'t) Theory.IEEE754.t,'s) Theory.format
 
 module Value = Knowledge.Value
 
-module Make(B : Theory.Core) = struct
+module Make(B : Theory.Basic) = struct
 
   open Knowledge.Syntax
 
@@ -109,6 +109,15 @@ module Make(B : Theory.Core) = struct
   let floats fsort = exps fsort, sigs fsort
 
   let bits = IEEE754.Sort.bits
+
+  let resort s x = KB.Value.refine x s
+
+  let rne, rna, rtp, rtn, rtz =
+    let mk i = B.of_int (Theory.Bitv.define 3) i >>| resort Theory.Rmode.t in
+    mk 1, mk 2, mk 3, mk 4, mk 5
+
+  let requal x y =
+    B.eq (x >>| resort @@ Theory.Bitv.define 3) (y >>| resort @@ Theory.Bitv.define 3)
 
   let fsign = B.msb
 
@@ -772,7 +781,7 @@ module Make(B : Theory.Core) = struct
 
   let ftwo fsort =
     fone fsort B.b0 >>>= fun one ->
-    fadd fsort B.rne one one
+    fadd fsort rne one one
 
   (* pre: fsort ">=" fsort' *)
   let truncate fsort x rm fsort' =
@@ -908,7 +917,7 @@ module Make(B : Theory.Core) = struct
     let fsort = Sort.define binary128 in
     B.int (bits fsort)
       (Bitvec.of_string "0x3fff6a09e667f3bcc908b2fb1366ea95") >>>= fun x ->
-    convert fsort x B.rne fsort'
+    convert fsort x rne fsort'
 
   let range_reconstruction fsort x d_expn clz increase =
     let idiv = fdiv in
@@ -1021,10 +1030,10 @@ module Make(B : Theory.Core) = struct
     normalize_subnormal fsort x @@ fun x clz ->
     range_reduction fsort x @@ fun y d_expn increase ->
     fone fsort B.b0 >>>= fun one ->
-    fsub fsort B.rne y one >>>= fun y ->
+    fsub fsort rne y one >>>= fun y ->
     extend fsort y fsort' >>>= fun y ->
     horner fsort' y (coefs (bits fsort')) >>>= fun y ->
     B.unsigned (exps fsort') d_expn >>>= fun d_expn ->
     range_reconstruction fsort' y d_expn clz increase >>>= fun r ->
-    truncate fsort' r B.rne fsort
+    truncate fsort' r rne fsort
 end
